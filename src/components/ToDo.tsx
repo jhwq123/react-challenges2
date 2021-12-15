@@ -1,5 +1,5 @@
 import React from "react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { Categories, IToDo, toDoState } from "../atoms";
 
 function ToDo({ text, category, id }: IToDo) {
@@ -10,15 +10,22 @@ function ToDo({ text, category, id }: IToDo) {
     } = event;
     setToDos((oldToDos) => {
       const targetIndex = oldToDos.findIndex((toDo) => toDo.id === id);
-      console.log(targetIndex);
       const newToDo = { text, id, category: name as any };
-      return [
-        ...oldToDos.slice(0, targetIndex),
-        newToDo,
-        ...oldToDos.slice(targetIndex + 1),
-      ];
+      if (newToDo.category === "DELETE") {
+        return [
+          ...oldToDos.slice(0, targetIndex),
+          ...oldToDos.slice(targetIndex + 1),
+        ];
+      } else {
+        return [
+          ...oldToDos.slice(0, targetIndex),
+          newToDo,
+          ...oldToDos.slice(targetIndex + 1),
+        ];
+      }
     });
   };
+  localStorage.setItem("toDo", JSON.stringify(useRecoilValue(toDoState)));
   return (
     <li>
       <span>{text}</span>
@@ -37,6 +44,9 @@ function ToDo({ text, category, id }: IToDo) {
           Done
         </button>
       )}
+      <button name={Categories.DELETE} onClick={onClick}>
+        Delete
+      </button>
     </li>
   );
 }
